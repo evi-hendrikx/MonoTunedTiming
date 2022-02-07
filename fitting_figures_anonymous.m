@@ -49,7 +49,6 @@ ylabel('Response amplitude per event')
 grayROI=load(fullfile(strcat(paths{subj_id},'/Gray/ROIs/gray-Layer1.mat')));
 cd(paths{subj_id})
 
-mrVista 3
 VOLUME{1} = initHiddenGray;
 grayCoords=grayROI.ROI.coords;
 [tmp, betaCrds] = intersectCols(grayCoords, VOLUME{1}.coords(:,whichVoxel));

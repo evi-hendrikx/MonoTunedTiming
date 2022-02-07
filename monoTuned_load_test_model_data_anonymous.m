@@ -168,7 +168,7 @@ for dset = 1:length(datasets) % the actual designed dataset
         end
     end
 end
-save('test_models.mat','evalModels','actualValues');
+save('parameters_validation.mat','evalModels','actualValues');
 
 close all
 end

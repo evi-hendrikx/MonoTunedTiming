@@ -7,11 +7,12 @@ function AnalysisValidationPredictions_anonymous(paths, subj_id, save_path,minVE
 % minDuration,maxDuration,minPeriod,maxPeriod: ranges outside which the tuned model is considered invalid
 
 save_path_stuct = strrep(save_path, [RESULTS],[DATA]); %TODO fill in
-if exist(strcat(save_path_struct, '/test_models.mat'), 'file') == 2
-    load(strcat(save_path_struct, '/test_models.mat'))
+if exist(strcat(save_path_struct, '/parameters_validation.mat'), 'file') == 2
+    load(strcat(save_path_struct, '/parameters_validation.mat'))
 else
     exclude_outside_range=0;
     [actualValues, evalModels] = monoTuned_load_test_model_data_anonymous(paths, subj_id,save_path_stuct, minDuration,maxDuration,minPeriod,maxPeriod, exclude_outside_range);
+    monoTuned_load_time_series_test_model_anonymous(paths, subj_id, save_path);
 end
 %% get all info
 
@@ -151,7 +152,7 @@ export_fig('VE_bins.eps','-eps','-r600','-painters');
 close all
 
 %% binning by actual variable
-variable = 'Theta'; %theta is more difficult, use round(..., 5)
+variable = 'sMaj'; %theta is more difficult, use round(..., 5)
 variable = char(variable);
 proportionCorrectIncluded = [];
 proportionCorrectExcluded = [];
