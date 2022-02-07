@@ -19,7 +19,10 @@ function [meanSub, ANOVAstruc] = monoTuned_build_meanSub_anonymous(cv_data, minV
 modelFieldNames = fieldnames(cv_data);
 subjNames = fieldnames(cv_data.(modelFieldNames{1}));
 condNames = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1})); % even & odd
-ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1}).(condNames{1}).crossValidated); %possible, because S3 has all maps
+ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{6}).(condNames{1}).crossValidated); %possible, because S7 has all maps
+if ecc_analysis == 1
+   ROILabels(contains(ROILabels,{'VO1','VO2','PHC'})) = []; %skip ventral stream ROIs 
+end
 ROIs = unique(erase(ROILabels, ["Right","Left","right","left"]),'stable');
 hemispheres = {'left','right'};
 

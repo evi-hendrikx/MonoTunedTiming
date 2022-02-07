@@ -18,9 +18,9 @@ function monoTuned_ecc_comparison_anonymous(save_path, minVE, timing_maps,median
 %% load data into right format
 %% load and prepare data
 if timing_maps == 1
-    load('ve_data_timing_maps.mat')
+    load('parameters_timing_maps.mat')
 elseif timing_maps == 0
-    load('ve_data_visual_field_maps.mat')
+    load('parameters_visual_field_maps.mat')
 end
 
 
@@ -32,7 +32,8 @@ cv_data = monoTuned_cv_timing_data_anonymous(ve_data, use_models);
 modelFieldNames = fieldnames(cv_data);
 subjNames = fieldnames(cv_data.(modelFieldNames{1}));
 condNames = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1}));
-ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1}).(condNames{1}).crossValidated); %possible, because Harv has all maps
+ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{6}).(condNames{1}).crossValidated); %possible, because S7 has all maps
+ROILabels(contains(ROILabels,{'VO1','VO2','PHC'})) = []; %skip ventral stream ROIs 
 ROIs = unique(erase(ROILabels, ["Right","Left","right","left"]),'stable');
 
 
@@ -93,9 +94,8 @@ for level = 1:length(levels)
     missing_value_near_all = isnan(meanSub.(levels{level}).near(:));
     missing_value_far_all = isnan(meanSub.(levels{level}).far(:));
     
-    % NOTE: Sloppy programming, if you do not know your dataset, adapt this to something more generalizable
-    % late addition, initially did anova on everything, but not anymore to
-    % keep anova & post hocs on the same data
+    % NOTE: too complicated programming, to remove values for which either near or far is missing
+    % late addition, initially did anova on everything, but not anymore to keep anova & post hocs on the same data
     if sum(missing_value_near_all)>0 && sum(missing_value_far_all)==0
         missing_ids = find(missing_value_near_all);
         veANOVA(missing_ids + length(meanSub.(levels{level}).near(:)) - sum(missing_value_near_all)) = [];
@@ -115,7 +115,27 @@ for level = 1:length(levels)
             ANOVAstruc.ecc(missing_ids) = [];
         end
     elseif sum(missing_value_far_all)>0 && sum(missing_value_near_all)>0
-        disp('WARNINGGGGGGGG THIS PART IS STILL MISSING')
+        only_missing_far = missing_value_far_all & ~missing_value_near_all;
+        only_missing_near = missing_value_near_all & ~missing_value_far_all;
+        only_missing_far(missing_value_near_all) = [];
+        only_missing_near(missing_value_far_all) = [];
+        only_missing_near = find(only_missing_near);
+        
+        veANOVA(only_missing_far) = [];
+        if level == 1 % shoud only be done once
+            ANOVAstruc.subj(only_missing_far) = [];
+            ANOVAstruc.roi(only_missing_far) = [];
+            ANOVAstruc.ecc(only_missing_far) = [];
+        end
+        
+        veANOVA(only_missing_near + length(meanSub.(levels{level}).near(:)) - sum(missing_value_near_all) - sum(only_missing_far)) = [];
+        ANOVAstruc.VE.(levels{level}) = veANOVA;
+        if level == 1 % shoud only be done once
+        ANOVAstruc.subj(only_missing_near + length(meanSub.(levels{level}).near(:)) - sum(missing_value_near_all)- sum(only_missing_far)) = [];
+        ANOVAstruc.roi(only_missing_near + length(meanSub.(levels{level}).near(:)) - sum(missing_value_near_all)- sum(only_missing_far)) = [];
+        ANOVAstruc.ecc(only_missing_near + length(meanSub.(levels{level}).near(:)) - sum(missing_value_near_all)- sum(only_missing_far)) = [];
+        end
+    
     end
     
     
@@ -137,8 +157,6 @@ for level = 1:length(levels)
         stat.data.(levels{level}).(ROIs{roi}).near = meanSub.(levels{level}).near(~missing_value_ids,roi);
         stat.data.(levels{level}).(ROIs{roi}).far = meanSub.(levels{level}).far(~missing_value_ids,roi);
  
-        % for these paired comparisons, it would be problematic if e.g.
-        % only the low range is missing for an observation. So check that
         if length(stat.data.(levels{level}).(ROIs{roi}).near) ~= length(stat.data.(levels{level}).(ROIs{roi}).far)
             fprintf('Near and far do not have same level of observations for %s, %s!!! PROBLEM\n', ROIs{roi}, levels{level});
         end
@@ -253,7 +271,6 @@ save_dir_ecc_stacks = [save_dir_ecc, 'ecc_stacks'];
 cd(save_dir_ecc_stacks)
 
 %% calculate means and SEs or medians and CIs
-% TODO: discuss: do I plot these with or without S5 left iPCS even far?
  midpoints_mod1_near = repelem(NaN,length(ROIs));midpoints_mod1_far = repelem(NaN,length(ROIs));midpoints_mod2_near = repelem(NaN,length(ROIs));midpoints_mod2_far = repelem(NaN,length(ROIs));midpoints_diff_near = repelem(NaN,length(ROIs));midpoints_diff_far = repelem(NaN,length(ROIs));
 if sum(stacked_plots_median) > 0   
     %use NaN removed data
@@ -363,7 +380,7 @@ close all
 if timing_maps ==1
     scatter_order=[4 10 9 8 2 6 5 7 1 3];
 elseif timing_maps == 0
-    scatter_order=[14:16,10:13,17,1:9];
+    scatter_order=[14:16,18,10:13,17,1:9];% %
 end
 
 x_LR=1:length(ROIs);

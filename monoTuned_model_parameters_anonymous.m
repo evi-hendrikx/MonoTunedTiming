@@ -12,9 +12,9 @@ function monoTuned_model_parameters_anonymous(save_path, minVE, timing_maps,medi
 
 %% load and prepare data
 if timing_maps == 1
-    load('ve_data_timing_maps.mat')
+    load('parameters_timing_maps.mat')
 elseif timing_maps == 0
-    load('ve_data_visual_field_maps.mat')
+    load('parameters_visual_field_maps.mat')
 end
 
 save_path_model_properties = strcat(save_path, 'model_property_comparisons/');
@@ -27,7 +27,8 @@ cv_data = monoTuned_cv_timing_data_anonymous(ve_data, use_models);
 modelFieldNames = fieldnames(cv_data);
 subjNames = fieldnames(cv_data.(modelFieldNames{1}));
 condNames = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1}));
-ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1}).(condNames{1}).crossValidated); %possible, because S3 has all maps
+ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{6}).(condNames{1}).crossValidated); %possible, because S7 has all maps
+ROILabels(contains(ROILabels,{'VO1','VO2','PHC'})) = []; %skip ventral stream ROIs 
 ROIs = unique(erase(ROILabels, ["Right","Left","right","left"]),'stable');
 
 %% prepare data for ANOVA
@@ -440,12 +441,19 @@ for parameter = 1:length(parameters)
         pnorm_jb = [];
         pnorm_sw = [];
         for roi = 1:length(ROIs)
+            try
             [stat.(parameters{parameter}).(modelNames{model}).normality_jb.(ROIs{roi}).h, stat.(parameters{parameter}).(modelNames{model}).normality_jb.(ROIs{roi}).p] = jbtest(stat.(parameters{parameter}).(modelNames{model}).data.(ROIs{roi}));
             pnorm_jb = [pnorm_jb stat.(parameters{parameter}).(modelNames{model}).normality_jb.(ROIs{roi}).p];
+            catch
+                pnorm_jb = [pnorm_jb NaN];
+            end
             
-            
+            try
             [stat.(parameters{parameter}).(modelNames{model}).normality_sw.(ROIs{roi}).h, stat.(parameters{parameter}).(modelNames{model}).normality_sw.(ROIs{roi}).p,stat.(parameters{parameter}).(modelNames{model}).normality_sw.(ROIs{roi}).w] = swtest(stat.(parameters{parameter}).(modelNames{model}).data.(ROIs{roi}));
             pnorm_sw = [pnorm_sw stat.(parameters{parameter}).(modelNames{model}).normality_jb.(ROIs{roi}).p];
+            catch
+                pnorm_sw = [pnorm_sw NaN];
+            end
         end
         
         [~, ~, ~, adj_pnorm_jb]=fdr_bh(pnorm_jb);
@@ -456,9 +464,9 @@ for parameter = 1:length(parameters)
         end
         
         % NOTE: Chose to go with only non-parametric tests, since not all parameters were normally distributed and we wanted to keep them similar
-        pairw_comp = dunn(data_rois,nr_rois);
+        pairw_comp = dunn_original(data_rois,nr_rois);
         stat.(parameters{parameter}).(modelNames{model}).dunncompare.tbl = pairw_comp;
-        id_sign = find(string(pairw_comp(:,6))=="Reject H0");
+        id_sign = find(string(pairw_comp(:,4))=="Reject H0");
         stat.(parameters{parameter}).(modelNames{model}).dunncompare.pairs = ROIs(str2double(split(pairw_comp(id_sign,1),'-')));
         stacked_plots_median = 1; % for plots
         
@@ -470,15 +478,19 @@ for parameter = 1:length(parameters)
             for roi = 1:length(ROIs)
                 midpoints(roi) =median(stat.(parameters{parameter}).(modelNames{model}).data.(ROIs{roi}));
                 barpoints(:,roi) = bootci(1000, {@median, stat.(parameters{parameter}).(modelNames{model}).data.(ROIs{roi})},'alpha',0.05);
-                stat.(parameters{parameter}).(modelNames{model}).CI.(ROIs{roi})= barpoints(:,roi);
+                if string(parameters{parameter}) == "beta_ratio"
+                    stat.(parameters{parameter}).(modelNames{model}).CI.(ROIs{roi}).points= barpoints(:,roi);
+                    stat.(parameters{parameter}).(modelNames{model}).median.(ROIs{roi}).points= midpoints(roi);
+                    barpoints(:,roi) = log10(barpoints(:,roi));
+                    midpoints(roi) = log10(midpoints(roi));
+                    stat.(parameters{parameter}).(modelNames{model}).CI.(ROIs{roi}).log = barpoints(:,roi);
+                    stat.(parameters{parameter}).(modelNames{model}).median.(ROIs{roi}).log= midpoints(roi);
+                else
+                    stat.(parameters{parameter}).(modelNames{model}).CI.(ROIs{roi})= barpoints(:,roi);
+                    stat.(parameters{parameter}).(modelNames{model}).median.(ROIs{roi})= midpoints(roi);
+                end
             end
-            
-            if string(parameters{parameter}) == "beta_ratio"
-                barpoints = log10(barpoints);
-                midpoints = log10(midpoints);
-                stat.(parameters{parameter}).(modelNames{model}).CI.(ROIs{roi}).log = barpoints;
-            end
-        
+   
             barpoints_low =  midpoints - barpoints(1,:);
             barpoints_high = barpoints(2,:) -  midpoints;
         else
@@ -501,7 +513,7 @@ for parameter = 1:length(parameters)
         if timing_maps ==1
             scatter_order=[4 10 9 8 2 6 5 7 1 3];
         elseif timing_maps == 0
-            scatter_order=[14:16,10:13,17,1:9];
+            scatter_order=[14:16,18,10:13,17,1:9];
         end
         
         x_LR=1:length(ROIs);
@@ -523,8 +535,8 @@ for parameter = 1:length(parameters)
             plot_max = 7;
             plot_min = 0;
         elseif string(parameters{parameter}) == 'beta_ratio'
-            plot_max = 1;
-            plot_min = -1;
+            plot_max = 1.5;
+            plot_min = -1.5;
         elseif string(parameters{parameter}) == 'major'
             plot_max = 1.1;
             plot_min = 0;

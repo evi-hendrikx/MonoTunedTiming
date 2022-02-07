@@ -15,7 +15,8 @@ function monoTuned_make_ecc_plots_anonymous(save_dir_ecc, cv_data, minVE, timing
 modelFieldNames = fieldnames(cv_data);
 subjNames = fieldnames(cv_data.(modelFieldNames{1}));
 condNames = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1})); % even & odd
-ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{1}).(condNames{1}).crossValidated); %possible, because S3 has all maps
+ROILabels = fieldnames(cv_data.(modelFieldNames{1}).(subjNames{6}).(condNames{1}).crossValidated); %possible, because S7 has all maps
+ROILabels(contains(ROILabels,{'VO1','VO2','PHC'})) = []; %skip ventral stream ROIs 
 ROIs = unique(erase(ROILabels, ["Right","Left","right","left"]),'stable');
 
 

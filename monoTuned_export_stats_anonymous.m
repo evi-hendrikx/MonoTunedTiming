@@ -6,8 +6,10 @@ function monoTuned_export_stats_anonymous(timing_maps, model_comparison, save_pa
 
 if timing_maps == 1
     scatter_order=[4 10 9 8 2 6 5 7 1 3];
-elseif timing_maps == 0
-    scatter_order=[14:16,10:13,17,1:9];
+elseif timing_maps == 0 && model_comparison == 1
+    scatter_order=[14:16,18:21,10:13,17,1:9];
+elseif timing_maps == 0 && model_comparison == 0
+    scatter_order=[14:16,18,10:13,17,1:9];
 end
 
 %% model comparisons
@@ -61,7 +63,7 @@ if model_comparison == 1
 
         n(roi) = num2str(stat.data.(ROIs{scatter_order(roi)}).N);
         Z_val(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).stats.zval,'%.2f');
-        eff_size(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).stats.zval/stat.data.(ROIs{scatter_order(roi)}).N,'%.2f');
+        eff_size(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).stats.zval/sqrt(stat.data.(ROIs{scatter_order(roi)}).N*2),'%.2f');
         p_val(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).adj_p);
     end
     
@@ -132,7 +134,7 @@ elseif model_comparison == 0
             
             Z_val(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).stats.zval,'%.2f');
             n(roi) = num2str(stat.data.(ROIs{scatter_order(roi)}).N);
-            eff_size(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).stats.zval/stat.data.(ROIs{scatter_order(roi)}).N,'%.2f');
+            eff_size(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).stats.zval/sqrt(stat.data.(ROIs{scatter_order(roi)}).N*2),'%.2f');
             p_val(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).adj_p);
         end
         

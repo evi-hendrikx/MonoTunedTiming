@@ -20,7 +20,7 @@ if timing_maps == 1
     ROILabels = [strcat('Left', ROIs), strcat('Right', ROIs)];
     ROINames = strcat(ROILabels,'Map.mat');
 elseif timing_maps == 0
-    ROIs =  {'IPS0', 'IPS1', 'IPS2','IPS3', 'IPS4','IPS5', 'sPCS1', 'sPCS2','iPCS','LO1','LO2', 'TO1', 'TO2','V1', 'V2','V3', 'V3AB'};
+    ROIs =  {'IPS0', 'IPS1', 'IPS2','IPS3', 'IPS4','IPS5', 'sPCS1', 'sPCS2','iPCS','LO1','LO2', 'TO1', 'TO2','V1', 'V2','V3', 'V3AB','V4','VO1','VO2','PHC'};
     ROILabels = [strcat('left', ROIs), strcat('right', ROIs)];
     ROINames = strcat('VFMafni_', ROILabels, '.mat');
 end
@@ -79,7 +79,15 @@ for subj = 1:length(new_subjNames)
                     if timing_maps == 1
                         ROI_path = strcat(paths{subj},'/Gray/ROIs/',ROINames{roi});
                     elseif timing_maps == 0
-                        ROI_path = strcat(paths{subj}, '/ROIs/',ROINames{roi});
+                        switch ROINames{roi}
+                            case {'VFMafni_leftLO1.mat', 'VFMafni_leftLO2.mat','VFMafni_leftVO1.mat','VFMafni_leftVO2.mat', ...
+                                    'VFMafni_leftV4.mat','VFMafni_leftPHC.mat','VFMafni_rightLO1.mat', 'VFMafni_rightLO2.mat', ...
+                                    'VFMafni_rightVO1.mat','VFMafni_rightVO2.mat','VFMafni_rightV4.mat','VFMafni_rightPHC.mat'}
+                                % strrep part is a trick to get original subject numbers
+                                ROI_path = char(strcat(paths{subj},'/ROIs/', strrep(extractBetween(paths{subj},'c/','C'),'_',''),'NewVFM/',ROINames{roi}));
+                            otherwise
+                                ROI_path = strcat(paths{subj}, '/ROIs/',ROINames{roi});
+                        end
                     end
                     
                     % need to check if file exists, because not all
@@ -143,7 +151,7 @@ for subj = 1:length(new_subjNames)
 end
 
 cd(save_path);
-savename = 've_data_';
+savename = 'parameters_';
 if timing_maps == 1
     savename = strcat(savename, 'timing');
 elseif timing_maps == 0
