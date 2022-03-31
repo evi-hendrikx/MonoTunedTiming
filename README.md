@@ -1,4 +1,4 @@
-# Visual timing-tuned responses in human association cortices and response dynamics in early visual cortex
+# MonoTunedTiming
 
 These scripts were used to run the analysis for 
 
