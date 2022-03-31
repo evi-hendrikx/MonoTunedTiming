@@ -110,7 +110,7 @@ if find(strcmp(modelFieldNames,'TunedLin2d'))
     pvals = [];
     if sum(stat.normality_jb.adj_pnorm<.05)>0
         for roi = 1:length(ROIs)
-            if length(stat.data.(ROIs{roi}).(modelFieldNames{2}) > 1)
+            if length(stat.data.(ROIs{roi}).(modelFieldNames{2})) > 1
                 [stat.wilcoxon.(ROIs{roi}).p, stat.wilcoxon.(ROIs{roi}).h, stat.wilcoxon.(ROIs{roi}).stats] = signrank(stat.data.(ROIs{roi}).(modelFieldNames{1}), stat.data.(ROIs{roi}).(modelFieldNames{2}), 'method','approximate');
                 pvals = [pvals stat.wilcoxon.(ROIs{roi}).p];
             else
