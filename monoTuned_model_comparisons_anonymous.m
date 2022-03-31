@@ -110,10 +110,10 @@ if find(strcmp(modelFieldNames,'TunedLin2d'))
     pvals = [];
     if sum(stat.normality_jb.adj_pnorm<.05)>0
         for roi = 1:length(ROIs)
-            try
+            if length(stat.data.(ROIs{roi}).(modelFieldNames{2}) > 1)
                 [stat.wilcoxon.(ROIs{roi}).p, stat.wilcoxon.(ROIs{roi}).h, stat.wilcoxon.(ROIs{roi}).stats] = signrank(stat.data.(ROIs{roi}).(modelFieldNames{1}), stat.data.(ROIs{roi}).(modelFieldNames{2}), 'method','approximate');
                 pvals = [pvals stat.wilcoxon.(ROIs{roi}).p];
-            catch
+            else
                 stat.wilcoxon.(ROIs{roi}).p = NaN;
                 stat.wilcoxon.(ROIs{roi}).stats = NaN;
                 pvals = [pvals NaN];
@@ -123,8 +123,9 @@ if find(strcmp(modelFieldNames,'TunedLin2d'))
         % for plots
         stacked_plots_median = 1;
     else
-        for roi = 1:length(ROIs)
+        for roi = 1:length(ROIs)  
             % ttest in matlab is paired if you give in two samples
+            % already gives NaN if there is 2 vectors to be compared with each only 1 element
             [stat.t.(ROIs{roi}).h, stat.t.(ROIs{roi}).p, stat.t.(ROIs{roi}).ci, stat.t.(ROIs{roi}).stats] = ttest(stat.data.(ROIs{roi}).(modelFieldNames{1}), stat.data.(ROIs{roi}).(modelFieldNames{2}));
             pvals = [pvals stat.t.(ROIs{roi}).p];
         end
