@@ -64,7 +64,7 @@ if model_comparison == 1
         n(roi) = num2str(stat.data.(ROIs{scatter_order(roi)}).N);
         try
         Z_val(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).stats.zval,'%.2f');
-        eff_size(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).stats.zval/sqrt(stat.data.(ROIs{scatter_order(roi)}).N*2),'%.2f');
+        eff_size(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).stats.zval/sqrt(stat.data.(ROIs{scatter_order(roi)}).N),'%.2f');
         p_val(roi) = num2str(stat.wilcoxon.(ROIs{scatter_order(roi)}).adj_p);
         catch
             Z_val(roi)="";
@@ -140,7 +140,7 @@ elseif model_comparison == 0
             
             Z_val(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).stats.zval,'%.2f');
             n(roi) = num2str(stat.data.(ROIs{scatter_order(roi)}).N);
-            eff_size(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).stats.zval/sqrt(stat.data.(ROIs{scatter_order(roi)}).N*2),'%.2f');
+            eff_size(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).stats.zval/sqrt(stat.data.(ROIs{scatter_order(roi)}).N),'%.2f');
             p_val(roi) = num2str(stat.wilcoxon.(modelFieldNames{model}).(ROIs{scatter_order(roi)}).adj_p);
         end
         
