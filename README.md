@@ -2,7 +2,7 @@
 
 These scripts were used to run the analysis for 
 
-Hendrikx, E., Paul, J.M., van Ackooij, M., van der Stoep, N., & Harvey, B.M. (2021) Visual timing-tuned responses in human association cortices and response dynamics in early visual cortex. Nature Communications (In revision). 
+Hendrikx, E., Paul, J.M., van Ackooij, M., van der Stoep, N., & Harvey, B.M. (2022) Visual timing-tuned responses in human association cortices and response dynamics in early visual cortex. Nature Communications (In revision). 
 
 The scripts were written in Matlab 2017a.
 
